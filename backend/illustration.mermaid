@@ -1,0 +1,40 @@
+flowchart TD
+    A[Start] --> B[POST /qr/get-qr]
+    B --> C[Get QR Code from Service]
+    C --> D{Existing QR Code?}
+    D -- Yes --> E[Check if QR Code is Expired]
+    D -- No --> F[Create New QR Code]
+    
+    E --> G{Is Expired?}
+    G -- Yes --> H[Delete Expired QR Code]
+    H --> I[Return New QR Code with isPaid: false]
+    G -- No --> J[Check if QR Code is Paid]
+    
+    J --> K{Is Paid?}
+    K -- Yes --> L[Return Existing QR Code with isPaid: true]
+    K -- No --> M[Return Existing QR Code with isPaid: false]
+    
+    F --> N[Prepare QR Data]
+    N --> O[Request QR Code from Xendit]
+    O --> P[Save QR Code to Database]
+    P --> Q[Return New QR Code with isPaid: false]
+    
+    L --> R[End]
+    M --> R
+    I --> R
+    Q --> R
+
+    %% Check Payment Flow
+    A2[Start] --> B2[GET /qr/check-qr-payment]
+    B2 --> C2[Fetch QR Code from Xendit]
+    C2 --> D2{QR Code Found?}
+    D2 -- Yes --> E2[Check if QR Code is Paid]
+    D2 -- No --> F2[Return NOT_FOUND]
+
+    E2 --> G2{Is Paid?}
+    G2 -- Yes --> H2[Return QR Code with isPaid: true]
+    G2 -- No --> I2[Return QR Code with isPaid: false]
+
+    H2 --> R
+    I2 --> R
+    F2 --> R
